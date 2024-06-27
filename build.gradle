@@ -1,0 +1,85 @@
+buildscript {
+    apply from: file('versions.gradle')
+    repositories {
+         mavenCentral()
+    }
+    dependencies {
+        classpath "org.scoverage:gradle-scoverage:$gradleScoverageVersion"
+        classpath "com.bmuschko:gradle-nexus-plugin:$gradleNexusPlugin"
+        classpath "org.wartremover:wartremover_${scalaMajorVersion}:${wartremoverVersion}"
+        classpath "net.researchgate:gradle-release:$gradleReleaseVersion"
+        classpath "com.github.maiflai:gradle-scalatest:$gradleScalatestVersion"
+
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'org.scoverage'
+
+dependencies {
+    compile "org.scala-lang:scala-library:${scalaVersion}"
+}
+
+final wartRemoveJarPath=rootProject.buildscript.configurations.getByName("classpath").filter {it.name.startsWith 'wartremover'}.singleFile.getAbsolutePath()
+
+allprojects {
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+configure(subprojects){
+    apply plugin: 'scala'
+    apply plugin: 'com.github.maiflai.scalatest'
+    apply plugin: 'org.scoverage'
+    sourceCompatibility="1.8"
+    compileScala{
+        scalaCompileOptions.additionalParameters=["-Xplugin:"+wartRemoveJarPath]
+    }
+    dependencies {
+        compile "org.scala-lang:scala-library:${scalaVersion}"
+        implementation 'org.slf4j:slf4j-api:1.7.25'
+        implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.2'
+        implementation 'com.typesafe.scala-logging:scala-logging_2.12:3.9.0'
+        implementation 'mysql:mysql-connector-java:8.0.28'
+        testImplementation 'org.scalatest:scalatest_2.12:3.0.4'
+        testImplementation 'org.scalatestplus:mockito-3-4_2.12:3.2.9.0'
+        testImplementation 'io.cucumber:cucumber-scala_2.12:8.20.0'
+        testImplementation 'io.cucumber:cucumber-junit:6.10.0'
+
+    }
+
+    test{
+        reports.html.enabled false
+        doFirst {
+            def cp =classpath.getFiles().join(File.pathSeparator)
+            environment 'CLASSPATH', cp
+            classpath = classpath.filter {false}
+        }
+    }
+}
+
+subprojects {
+    dependencies {
+        compile "org.scala-lang:scala-library:${scalaVersion}"
+        implementation 'org.slf4j:slf4j-api:1.7.25'
+        implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.2'
+
+        implementation 'com.typesafe.scala-logging:scala-logging_2.12:3.9.0'
+        implementation 'mysql:mysql-connector-java:8.0.28'
+
+
+    }
+    subprojects {
+        uploadArchives.enabled=false
+        configurations {
+            all*.exclude group:"org.apache.logging.log4j"
+        }
+    }
+}
+
+wrapper{
+    gradleVersion="5.6.3"
+    distributionUrl="https\\://services.gradle.org/distributions/gradle-5.6.3-bin.zip"
+}
