@@ -1,4 +1,4 @@
-/*
+
 package crud_op
 
 import crud_op.Entity.Person
@@ -19,7 +19,7 @@ class UnitTest extends FlatSpec with Matchers with MockitoSugar {
   }
   "The Person Table Was Created" should "insert into table" taggedAs Tag("UnitTest") in {
 
-    when(repo.createPerson()).thenReturn("Created Successful")
+//    when(repo.createPerson()).thenReturn("Created Successful")
     service.obj.createPerson()
     verify(repo).createPerson()
 
@@ -29,11 +29,6 @@ class UnitTest extends FlatSpec with Matchers with MockitoSugar {
   //For data Insert
 
   "The person details" should "inserted successfully" in{
- /*   when(repo.insertPerson(person)).thenReturn("Data Inserted Successfully!!!!!!!!!!!!!!!")
-    service.insert(person)
-    verify(repo).insertPerson(person)*/
-//    when(repo.insertPerson(filepath:String)).thenReturn("Data Inserted Successfully!!!!!!!!!!!!!!!")
-//    verify(repo).insertPerson(filepath)
 
     service.insert(filepath)
     verify(repo).insertPerson(filepath)
@@ -70,4 +65,4 @@ class UnitTest extends FlatSpec with Matchers with MockitoSugar {
 }
 
 
-*/
+

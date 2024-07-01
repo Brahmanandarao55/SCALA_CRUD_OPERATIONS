@@ -1,4 +1,5 @@
 package crud_op.Repository
+import crud_op.Configurations.jdbcConnection
 import crud_op.Entity.Person
 
 import java.io.File
@@ -7,23 +8,12 @@ import scala.io.Source
 
 class PersonRepoImpl extends PersonRepo {
 
-  private val url = "jdbc:mysql://localhost:3306/person"
-  private val host = "root"
-  private val pass = "root"
-  private val driver = "com.mysql.cj.jdbc.Driver"
-  private val connection:Connection =jdbcConnection()
-
-
-
-  override def jdbcConnection(): Connection = {
-    Class.forName(driver)
-    DriverManager.getConnection(url,host,pass)
-  }
-
-  override def createPerson(): String = {
+  val dbobj = new jdbcConnection
+  val con: Connection = dbobj.connection
+  override def createPerson(): Unit = {
     try {
       val query: String = " CREATE TABLE IF NOT EXISTS persontable (ID INT PRIMARY KEY, NAME VARCHAR(26), AGE INT);"
-      val statement: Statement = connection.createStatement()
+      val statement: Statement = con.createStatement()
       statement.executeUpdate(query)
 
     }
@@ -31,11 +21,14 @@ class PersonRepoImpl extends PersonRepo {
       case e:Exception => e.printStackTrace()
 
     }
-    "Created Successful"
+    finally {
+      con.close()
+    }
+
 
   }
 
-  override def insertPerson(filepath: String): String = {
+  override def insertPerson(filepath: String): Unit = {
     try {
       val startTime = System.currentTimeMillis()
       val bufferedSource = Source.fromFile(new File(filepath))
@@ -44,12 +37,12 @@ class PersonRepoImpl extends PersonRepo {
         val fields = line.split(",").map(_.trim)
         Person(fields(0).toInt, fields(1), fields(2).toInt)
       }.toList
-      connection.setAutoCommit(false)
+      con.setAutoCommit(false)
       val query: String =
         """
           |INSERT INTO persontable values(?,?,?);
           |""".stripMargin
-      val statement: PreparedStatement = connection.prepareStatement(query)
+      val statement: PreparedStatement = con.prepareStatement(query)
       val batchSize = 1000
       var count = 0
       person.foreach { persons =>
@@ -64,21 +57,21 @@ class PersonRepoImpl extends PersonRepo {
       }
       statement.executeBatch()
       bufferedSource.close()
-      connection.commit()
+      con.commit()
 
       val endTime = System.currentTimeMillis()
       val totalTimeSeconds = (endTime - startTime) / 1000.0
       println(s"Total insertion time: ${totalTimeSeconds} seconds")
 
-//        connection.close()
     }
     catch {
       case e:Exception => e.printStackTrace()
-        connection.rollback()
+        con.rollback()
+    }
+    finally {
+      con.close()
     }
 
-//      connection.close()
-      "Data Inserted Successfully!!!!!!!!!!!!!!!"
 
   }
 
@@ -88,7 +81,7 @@ class PersonRepoImpl extends PersonRepo {
       """
         |SELECT * FROM persontable WHERE ID = ?;
         |""".stripMargin
-       val statement:PreparedStatement = connection.prepareStatement(query)
+       val statement:PreparedStatement = con.prepareStatement(query)
        statement.setInt(1,id.getOrElse(throw new IllegalArgumentException("GIVEN ID IS INVALID")))
        val resultset: ResultSet = statement.executeQuery()
        while (resultset.next()) {
@@ -103,12 +96,15 @@ class PersonRepoImpl extends PersonRepo {
     catch {
       case e:Exception => e.printStackTrace()
     }
+    finally {
+      con.close()
+    }
   }
 
   override def updatePerson(person: Person): Unit = {
     try {
       val query: String = "UPDATE personTable SET NAME = ?, AGE = ? WHERE ID = ?"
-      val statement: PreparedStatement = connection.prepareStatement(query)
+      val statement: PreparedStatement = con.prepareStatement(query)
       statement.setString(1, person.Name)
       statement.setInt(2, person.Age)
       statement.setInt(3, person.Id)
@@ -119,6 +115,9 @@ class PersonRepoImpl extends PersonRepo {
     catch {
       case e:Exception => e.printStackTrace()
     }
+    finally {
+      con.close()
+    }
   }
 
   override def deletePerson(id: Option[Int]): Unit = {
@@ -127,7 +126,7 @@ class PersonRepoImpl extends PersonRepo {
         """
           |DELETE FROM persontable WHERE ID = ?;
           |""".stripMargin
-      val statement: PreparedStatement = connection.prepareStatement(query)
+      val statement: PreparedStatement = con.prepareStatement(query)
       statement.setInt(1, id.getOrElse(throw new IllegalArgumentException("ENTERED ID IS NOT VALID")))
       statement.executeUpdate()
 
@@ -138,14 +137,16 @@ class PersonRepoImpl extends PersonRepo {
     catch {
       case e:Exception => e.printStackTrace()
     }
-
+   finally {
+     con.close()
+   }
 
   }
 
   override def personTable(): Unit = {
     try{
       val query = "SELECT * FROM persontable"
-      val statement = connection.createStatement()
+      val statement = con.createStatement()
       val resultSet:ResultSet = statement.executeQuery(query)
       while(resultSet.next()){
          val id = resultSet.getInt("ID")
@@ -157,6 +158,9 @@ class PersonRepoImpl extends PersonRepo {
     }
     catch {
       case e:Exception => e.printStackTrace()
+    }
+    finally {
+      con.close()
     }
   }
 }
