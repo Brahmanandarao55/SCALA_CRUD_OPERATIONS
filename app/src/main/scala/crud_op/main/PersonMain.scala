@@ -10,7 +10,7 @@ object PersonMain extends App {
 
  val filepath = "C:\\Users\\Brahmananda Rao\\Desktop\\TASK\\CRUD_OP\\app\\src\\main\\scala\\crud_op\\main\\data.csv"
  private val service = new PersonServiceImpl
- service.insert(filepath)
+// service.insert(filepath)
 
 }
 

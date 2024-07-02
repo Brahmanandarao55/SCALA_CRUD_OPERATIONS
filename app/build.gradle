@@ -20,10 +20,12 @@ dependencies {
     implementation 'com.jcraft:jsch:0.1.55'
     implementation 'org.apache.poi:poi:3.17'
     implementation 'org.apache.poi:poi-ooxml:3.17'
+    implementation 'com.opencsv:opencsv:5.5'
     testImplementation 'org.scalatest:scalatest_2.12:3.0.4'
     testImplementation 'org.scalatestplus:mockito-3-4_2.12:3.2.9.0'
     testImplementation 'io.cucumber:cucumber-scala_2.12:8.20.0'
     testImplementation 'io.cucumber:cucumber-junit:6.10.0'
+
 
 }
 uploadArchives.enabled=true
