@@ -1,203 +1,182 @@
-/*package crud_op
-
+package crud_op
 import crud_op.Entity.Person
 import crud_op.Repository.PersonRepoImpl
 import org.mockito.ArgumentMatchers.anyString
+import org.mockito.Mockito.{times, verify, when}
+import org.scalatest.mockito.MockitoSugar
+import org.scalatest.{FlatSpec, Matchers}
 
 import java.io.File
-import scala.io.{BufferedSource, Source}
+import java.sql.{Connection, PreparedStatement, ResultSet, SQLException, Statement}
+import scala.io.Source
 
-//import crud_op.main.PersonMain.filepath
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{times, verify, when}
-import org.scalatest.{FlatSpec, Matchers}
-import org.scalatest.mockito.MockitoSugar
+class UnitTest2 extends FlatSpec with Matchers with MockitoSugar {
 
-import java.sql.{Connection, PreparedStatement, ResultSet, Statement}
+  "createPerson" should "create the table if it does not exist" in {
 
+    val mockConnection: Connection = mock[Connection]
+    val mockStatement: Statement = mock[Statement]
+    when(mockConnection.createStatement()).thenReturn(mockStatement)
+    when(mockStatement.executeUpdate(anyString())).thenReturn(1)
 
-class UnitTest2  extends FlatSpec with Matchers with MockitoSugar {
-  val filepath = "C:\\Users\\Brahmananda Rao\\Desktop\\TASK\\CRUD_OP\\app\\src\\main\\scala\\crud_op\\main\\data.csv"
-  val person: Person = Person(1, "John Doe", 25)
-  val connection: Connection = mock[Connection]
-  val statement: Statement = mock[Statement]
-  val preparedStatement: PreparedStatement = mock[PreparedStatement]
-  val resultSet: ResultSet = mock[ResultSet]
-  val repo: PersonRepoImpl = new PersonRepoImpl {
-    override def jdbcConnection(): Connection = connection
-  }
+    val repo = new PersonRepoImpl {
+      override val con: Connection = mockConnection
+    }
+    repo.createPerson()
 
-  "PersonRepoImpl" should "create person table successfully" in {
-    when(connection.createStatement()).thenReturn(statement)
-    when(statement.executeUpdate(anyString())).thenReturn(1)
-
-    val result = repo.createPerson()
-    result shouldBe "Created Successful"
-
-    verify(connection).createStatement()
-    verify(statement).executeUpdate(" CREATE TABLE IF NOT EXISTS persontable (ID INT PRIMARY KEY, NAME VARCHAR(26), AGE INT);")
-  }
-
-  "createPerson" should "handle other exceptions during table creation" in {
-
-    // Set up mock behaviors
-    when(connection.createStatement()).thenReturn(statement)
-    when(statement.executeUpdate(anyString())).thenAnswer(_ => throw new RuntimeException("Some unexpected error"))
-
-    // Verify interactions
-    verify(connection, times(1)).createStatement() // Ensure createStatement() is called exactly once
-    verify(statement).executeUpdate(anyString()) // Ensure executeUpdate() is called with any string
-
-    // Check result handling
-//    result should include("Exception") // Modify this to match the actual behavior of your printStackTrace() call
-  }
-
- "insertPerson" should "inserted data from a file to persontable successfully" in {
-
-     val filePath = "path/to/file.csv"
-     val lines = List("1,Nandha,22","2,Kesav,21")
-      val result = lines.map{ line =>
-        val feild = line.split(",")
-        Person(feild(0).toInt,feild(1),feild(2).toInt)
-
-      }
-
-//    var source = mock[Source]
-//   when(source.fromFile(any[F ile])).thenReturn(BufferedSource)
-
-
-
-
-
-
-
-
+    verify(mockConnection).createStatement()
+    verify(mockStatement).executeUpdate(" CREATE TABLE IF NOT EXISTS persontable (ID INT PRIMARY KEY, NAME VARCHAR(26), AGE INT);")
+    verify(mockConnection).close()
 
   }
 
+  it should "handle SQLException and not propagate it" in {
 
+    val mockConnection: Connection = mock[Connection]
+    val mockStatement: Statement = mock[Statement]
 
+    when(mockConnection.createStatement()).thenReturn(mockStatement)
+    when(mockStatement.executeUpdate(anyString())).thenThrow(new SQLException("hi"))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  /*it should "insert person successfully" in {
-    when(connection.prepareStatement(any[String])).thenReturn(preparedStatement)
-    when(preparedStatement.executeBatch()).thenReturn(Array(1,1))
-    noException should be thrownBy repo.insertPerson(filepath:String)
-    verify(preparedStatement).setInt(1, person.Id)
-    verify(preparedStatement).setString(2, person.Name)
-    verify(preparedStatement).setInt(3, person.Age)
-    verify(preparedStatement).executeUpdate()
-    verify(connection).close()
-  }
-
-  it should "get person successfully" in {
-    val connection = mock[Connection]
-    val preparedStatement = mock[PreparedStatement]
-    val resultSet = mock[ResultSet]
-    when(connection.prepareStatement(any[String])).thenReturn(preparedStatement)
-    when(preparedStatement.executeQuery()).thenReturn(resultSet)
-    when(resultSet.next()).thenReturn(true, false)
-    when(resultSet.getInt("ID")).thenReturn(1)
-    when(resultSet.getString("NAME")).thenReturn("John Doe")
-    when(resultSet.getInt("AGE")).thenReturn(25)
 
 
     val repo = new PersonRepoImpl {
-      override def jdbcConnection(): Connection = connection
+      override val con: Connection = mockConnection
     }
 
-    noException should be thrownBy repo.getPerson(Some(1))
-    verify(preparedStatement).setInt(1, 1)
-    verify(preparedStatement).executeQuery()
-    verify(resultSet, times(2)).next()
-    verify(connection).close()
+    repo.createPerson()
+
+    verify(mockConnection).createStatement()
+    verify(mockStatement).executeUpdate(anyString())
+    verify(mockConnection).close()
   }
 
-  it should "update person successfully" in {
-    val connection = mock[Connection]
-    val preparedStatement = mock[PreparedStatement]
-    when(connection.prepareStatement(any[String])).thenReturn(preparedStatement)
 
-    val repo = new PersonRepoImpl {
-      override def jdbcConnection(): Connection = connection
+   "insertPerson" should "insert persons from the file into the database" in {
+
+      val mockConnection = mock[Connection]
+     val mockPreparedStatement = mock[PreparedStatement]
+
+     when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement)
+
+     val testDataFilePath = "C:\\Users\\Brahmananda Rao\\Desktop\\TASK\\CRUD_OP\\app\\src\\test\\scala\\crud_op\\testfile.csv"
+
+     val repo = new PersonRepoImpl {
+       override val con: Connection = mockConnection
+     }
+    repo.insertPerson(testDataFilePath)
+    val buffersource = Source.fromFile(new File(testDataFilePath))
+    val lines = buffersource.getLines().drop(1)
+    val person = lines.map { line =>
+      val fields = line.split(",").map(_.trim)
+      Person(fields(0).toInt, fields(1), fields(2).toInt)
+    }.toList
+
+   verify(mockConnection).prepareStatement( """
+                                              |INSERT INTO persontable values(?,?,?);
+                                              |""".stripMargin)
+
+
+     verify(mockPreparedStatement, times(4)).addBatch()
+     verify(mockPreparedStatement).executeBatch()
+     verify(mockConnection).commit()
+
+   }
+
+  "getPerson" should "retrieve and print person details by ID" in {
+    val mockConnection = mock[Connection]
+    val mockPreparedStatement = mock[PreparedStatement]
+    val mockResultSet = mock[ResultSet]
+
+    when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement)
+    when(mockPreparedStatement.executeQuery()).thenReturn(mockResultSet)
+    when(mockResultSet.next()).thenReturn(true).thenReturn(false)
+    when(mockResultSet.getInt("ID")).thenReturn(1)
+    when(mockResultSet.getString("NAME")).thenReturn(anyString())
+    when(mockResultSet.getInt("AGE")).thenReturn(25)
+
+
+    val repo = new PersonRepoImpl{
+      override val con: Connection = mockConnection
+    }
+    repo.getPerson(Some(1))
+
+    verify(mockPreparedStatement).setInt(1, 1)
+    verify(mockPreparedStatement).executeQuery()
+    verify(mockResultSet).getInt("ID")
+    verify(mockResultSet).getString("NAME")
+    verify(mockResultSet).getInt("AGE")
+    verify(mockConnection).close()
+  }
+
+  "updatePerson" should "update the person details in the database" in {
+    val mockConnection = mock[Connection]
+    val mockPreparedStatement = mock[PreparedStatement]
+
+    when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement)
+
+
+    val repo = new PersonRepoImpl{
+      override val con: Connection = mockConnection
+    }
+    val person = Person(1, "John", 26)
+    repo.updatePerson(person)
+
+    verify(mockPreparedStatement).setString(1, "John")
+    verify(mockPreparedStatement).setInt(2, 26)
+    verify(mockPreparedStatement).setInt(3, 1)
+    verify(mockPreparedStatement).executeUpdate()
+    verify(mockConnection).close()
+
+  }
+
+  "deletePerson" should "delete the person from the database by ID" in {
+    val mockConnection = mock[Connection]
+    val mockPreparedStatement = mock[PreparedStatement]
+
+    when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement)
+
+
+    val repo = new PersonRepoImpl{
+      override val con: Connection = mockConnection
+    }
+    repo.deletePerson(Some(1))
+
+    verify(mockPreparedStatement).setInt(1, 1)
+    verify(mockPreparedStatement).executeUpdate()
+    verify(mockConnection).close()
+  }
+
+  "personTable" should "retrieve and print all person details" in {
+    val mockConnection = mock[Connection]
+    val mockStatement = mock[Statement]
+    val mockResultSet = mock[ResultSet]
+
+    when(mockConnection.createStatement()).thenReturn(mockStatement)
+    when(mockStatement.executeQuery(anyString())).thenReturn(mockResultSet)
+    when(mockResultSet.next()).thenReturn(true).thenReturn(false)
+    when(mockResultSet.getInt("ID")).thenReturn(1)
+    when(mockResultSet.getString("NAME")).thenReturn("John")
+    when(mockResultSet.getInt("AGE")).thenReturn(25)
+
+    val repo = new PersonRepoImpl{
+      override val con: Connection = mockConnection
     }
 
-    val person = Person(1, "John Doe", 30)
-    when(preparedStatement.executeUpdate()).thenReturn(1)
-    noException should be thrownBy repo.updatePerson(person)
-    verify(preparedStatement).setString(1, person.Name)
-    verify(preparedStatement).setInt(2, person.Age)
-    verify(preparedStatement).setInt(3, person.Id)
-    verify(preparedStatement).executeUpdate()
-    verify(connection).close()
-  }
+    repo.personTable()
 
-  it should "delete person successfully" in {
-    when(connection.prepareStatement(any[String])).thenReturn(preparedStatement)
-    when(preparedStatement.executeUpdate()).thenReturn(1)
-    noException should be thrownBy repo.deletePerson(Some(1))
-    verify(preparedStatement).setInt(1, 1)
-    verify(preparedStatement).executeUpdate()
-    verify(connection).close()
-  }
-
-  it should "fetch all persons successfully" in {
-    when(connection.createStatement()).thenReturn(statement)
-    when(statement.executeQuery(any[String])).thenReturn(resultSet)
-    when(resultSet.next()).thenReturn(true, false)
-    when(resultSet.getInt("ID")).thenReturn(1)
-    when(resultSet.getString("NAME")).thenReturn("John Doe")
-    when(resultSet.getInt("AGE")).thenReturn(25)
-
-    noException should be thrownBy repo.personTable()
-    verify(statement).executeQuery(any[String])
-    verify(resultSet, times(2)).next()
-    verify(connection).close()
+    verify(mockStatement).executeQuery("SELECT * FROM persontable")
+    verify(mockResultSet).getInt("ID")
+    verify(mockResultSet).getString("NAME")
+    verify(mockResultSet).getInt("AGE")
+    verify(mockConnection).close()
   }
 
 
-*/
-}*/
+
+
+
+
+
+
+}
