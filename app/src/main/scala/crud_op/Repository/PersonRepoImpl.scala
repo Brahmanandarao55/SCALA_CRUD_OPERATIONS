@@ -18,8 +18,8 @@ class PersonRepoImpl extends PersonRepo {
 
     }
     catch {
-      case e:Exception => e.printStackTrace()
-
+      case s:SQLException =>
+        s.printStackTrace()
     }
     finally {
       con.close()
@@ -89,7 +89,7 @@ class PersonRepoImpl extends PersonRepo {
         val name = resultset.getString("NAME")
         val age = resultset.getInt("AGE")
         println(s"$id, $name, $age")
-//         connection.close()
+
       }
 
   }
@@ -110,7 +110,7 @@ class PersonRepoImpl extends PersonRepo {
       statement.setInt(3, person.Id)
       statement.executeUpdate()
       println(s"ROW WITH ${person.Id} IS UPDATED")
-//      connection.close()
+
     }
     catch {
       case e:Exception => e.printStackTrace()
@@ -131,7 +131,7 @@ class PersonRepoImpl extends PersonRepo {
       statement.executeUpdate()
 
       println(s"ROW WITH ID $id IS DELETED")
-//      connection.close()
+
 
     }
     catch {
