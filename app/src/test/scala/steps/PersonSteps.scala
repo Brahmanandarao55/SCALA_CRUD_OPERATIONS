@@ -1,99 +1,89 @@
-/*
-
 package steps
+
 import crud_op.Entity.Person
-import io.cucumber.scala.{EN, ScalaDsl}
 import crud_op.Repository.PersonRepoImpl
 import crud_op.Service.PersonServiceImpl
-import org.mockito.Mockito.{verify, when}
-import org.scalatest.Matchers
+import io.cucumber.scala.{EN, ScalaDsl}
+import org.mockito.ArgumentMatchers.{any, anyString}
+import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 
-import java.sql.{Connection, PreparedStatement, ResultSet, Statement}
+class PersonSteps extends ScalaDsl with EN with MockitoSugar {
+  var mockRepo: PersonRepoImpl = _
+  var service: PersonServiceImpl = _
 
-class PersonSteps extends ScalaDsl with EN with Matchers with MockitoSugar {
-  var mockConnection: Connection = _
-  var mockStatement: Statement = _
-  var mockPreparedStatement: PreparedStatement = _
-  var mockResultSet: ResultSet = _
-  var personRepo:PersonRepoImpl = mock[PersonRepoImpl]
-  val personService:PersonServiceImpl = new PersonServiceImpl{
-    override val obj: PersonRepoImpl = personRepo
+  Given("""a person repository""") { () =>
+    mockRepo = mock[PersonRepoImpl]
+    service = new PersonServiceImpl {
+      override val obj: PersonRepoImpl = mockRepo
+    }
+  }
+
+  When("""I create the person table""") { () =>
+    service.obj.createPerson()
+  }
+
+  Then("""the table should be created""") { () =>
+    verify(mockRepo).createPerson()
+  }
+
+  When("""I insert persons from the file {string}""") { (filePath: String) =>
+    service.insert(filePath)
+  }
+
+  Then("""the persons should be inserted""") { () =>
+    verify(mockRepo).insertPerson(anyString())
+  }
+
+  Given("""a person repository with a person having ID {int}""") { (id: Int) =>
+
+    mockRepo = mock[PersonRepoImpl]
+    service = new PersonServiceImpl {
+      override val obj: PersonRepoImpl = mockRepo
+    }
+
+  }
+
+  When("""I get the person by ID {int}""") { (id: Int) =>
+    service.get(Some(id))
+  }
+
+  Then("""the person's details should be retrieved""") { () =>
+    verify(mockRepo).getPerson(Some(1))
+  }
+
+  When("""I update the person details with ID {int}""") { (id: Int) =>
+
+    val person = Person(id, "John", 26)
+    service.update(person)
+  }
+
+  Then("""the person's details should be updated""") { () =>
+    verify(mockRepo).updatePerson(any[Person])
+  }
+
+  When("""I delete the person by ID {int}""") { (id: Int) =>
+    service.delete(Some(id))
+  }
+
+  Then("""the person should be deleted""") { () =>
+    verify(mockRepo).deletePerson(Some(1))
+  }
+
+  Given("""a person repository with persons""") { () =>
+    // Assume the repo has persons already; mock behavior can be added as needed
+    mockRepo = mock[PersonRepoImpl]
+    service = new PersonServiceImpl {
+      override val obj: PersonRepoImpl = mockRepo
+    }
+
+  }
+
+  When("""I retrieve all persons""") { () =>
+    service.personTable()
+  }
+
+  Then("""all persons' details should be retrieved""") { () =>
+    verify(mockRepo).personTable()
+  }
 }
-
-  //For Create
-  Given("""a Person Repository"""){ () =>
-    when(personRepo.createPerson()).thenReturn("Created Successful")
-  }
-
-  Given("""a person with ID {int}, name {string}, and age {int}"""){
-    (id:Int,name:String,age:Int)=>
-      personService.insert(Person(id,name,age))
-  }
-
-  When("""I created a person table"""){
-    () =>
-      personService.obj.createPerson()
-  }  
-  Then("""the table should be created"""){
-    () =>
-      verify(personRepo).createPerson()
-  }
-
-  //For Insert
-  When("""I insert the person into the table""") { () =>
-    personService.insert(Person(1,"Nandha",22))
-
-  }
-  Then("""the person should be inserted successfully"""){
-    () =>
-      verify(personRepo).insertPerson(Person(1,"Nandha",22))
-  }
-
-  //For Get person
-
-  When("""I get the person with ID {int}"""){ (id:Int) =>
-    personService.get(Some(id))
-
-  }
-
-  Then("""the person details should be displayed"""){
-    () =>
-      verify(personRepo).getPerson(Some(1))
-  }
-
- // For Update
-
-  When("""I update the person with ID {int} to have name {string} and age {int}"""){
-    (id:Int,name:String,age:Int) =>
-      personService.update(Person(id,name,age))
-  }
-
-  Then("""the person details should be updated successfully"""){
-    () =>
-      verify(personRepo).updatePerson(Person(1,"Nandha",22))
-  }
-
-  //For delete
-
-  When("""I delete the person with ID {int}"""){
-    (id:Int) =>
-      personService.delete(Some(id))
-  }
-  Then("""the person should be deleted successfully"""){
-    () =>
-      verify(personRepo).deletePerson(Some(1))
-  }
-
-  When("""I display all persons"""){
-    () =>
-      personService.personTable()
-  }
-  Then("""all persons should be displayed"""){
-    ()=>
-      verify(personRepo).personTable()
-  }
-
-  }
-
-*/

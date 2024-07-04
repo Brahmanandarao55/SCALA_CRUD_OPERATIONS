@@ -1,35 +1,31 @@
-#Feature: Person Table CRUD operations
-#  Scenario: Create Person Table
-#    Given a Person Repository
-#    When I created a person table
-#    Then the table should be created
-#
-#  Scenario: Insert Data Into Person Table
-#    Given a Person Repository
-#    When I insert the person into the table
-#    Then the person should be inserted successfully
-#
-#  Scenario: Get a Person
-#    Given a Person Repository
-#    And a person with ID 1, name "Nandha", and age 22
-#    When I get the person with ID 1
-#    Then the person details should be displayed
-#
-#
-#  Scenario: Update a Person
-#    Given a Person Repository
-#    And a person with ID 1, name "Nandha", and age 22
-#    When I update the person with ID 1 to have name "Nandha" and age 22
-#    Then the person details should be updated successfully
-#
-#  Scenario: Delete a Person
-#    Given a Person Repository
-#    And a person with ID 1, name "Nandha", and age 22
-#    When I delete the person with ID 1
-#    Then the person should be deleted successfully
-#
-#
-#  Scenario: Display all persons
-#    Given a Person Repository
-#    When I display all persons
-#    Then all persons should be displayed
+Feature: Person operations
+
+  Scenario: Create person table
+    Given a person repository
+    When I create the person table
+    Then the table should be created
+
+  Scenario: Insert person from file
+    Given a person repository
+    When I insert persons from the file "data.csv"
+    Then the persons should be inserted
+
+  Scenario: Get person by ID
+    Given a person repository with a person having ID 1
+    When I get the person by ID 1
+    Then the person's details should be retrieved
+
+  Scenario: Update person details
+    Given a person repository with a person having ID 1
+    When I update the person details with ID 1
+    Then the person's details should be updated
+
+  Scenario: Delete person by ID
+    Given a person repository with a person having ID 1
+    When I delete the person by ID 1
+    Then the person should be deleted
+
+  Scenario: Retrieve all persons
+    Given a person repository with persons
+    When I retrieve all persons
+    Then all persons' details should be retrieved

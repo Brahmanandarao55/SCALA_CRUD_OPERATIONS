@@ -19,8 +19,9 @@ class UnitTest extends FlatSpec with Matchers with MockitoSugar {
   }
   "The Person Table Was Created" should "insert into table" taggedAs Tag("UnitTest") in {
 
-//    when(repo.createPerson()).thenReturn("Created Successful")
+
     service.obj.createPerson()
+
     verify(repo).createPerson()
 
 
@@ -29,6 +30,8 @@ class UnitTest extends FlatSpec with Matchers with MockitoSugar {
   //For data Insert
 
   "The person details" should "inserted successfully" in{
+
+
 
     service.insert(filepath)
     verify(repo).insertPerson(filepath)
@@ -48,7 +51,7 @@ class UnitTest extends FlatSpec with Matchers with MockitoSugar {
 
   }
 
-  //For Delelte
+  //For Delete
   it should "delete a person by id" in {
     val id = Some(1)
     service.delete(id)
