@@ -12,6 +12,7 @@ class PersonRepoImpl extends PersonRepo {
   val con: Connection = dbobj.connection
   override def createPerson(): Unit = {
     try {
+
       val query: String = " CREATE TABLE IF NOT EXISTS persontable (ID INT PRIMARY KEY, NAME VARCHAR(26), AGE INT);"
       val statement: Statement = con.createStatement()
       statement.executeUpdate(query)
@@ -53,7 +54,7 @@ class PersonRepoImpl extends PersonRepo {
         count+=1
       }
       if (count % batchSize == 0) {
-        statement.executeBatch()
+         statement.executeBatch()
       }
       statement.executeBatch()
       bufferedSource.close()
@@ -65,7 +66,7 @@ class PersonRepoImpl extends PersonRepo {
 
     }
     catch {
-      case e:Exception => e.printStackTrace()
+      case e:SQLException => e.printStackTrace()
         con.rollback()
     }
     finally {
@@ -94,7 +95,7 @@ class PersonRepoImpl extends PersonRepo {
 
   }
     catch {
-      case e:Exception => e.printStackTrace()
+      case e:SQLException => e.printStackTrace()
     }
     finally {
       con.close()
@@ -113,7 +114,7 @@ class PersonRepoImpl extends PersonRepo {
 
     }
     catch {
-      case e:Exception => e.printStackTrace()
+      case e:SQLException => e.printStackTrace()
     }
     finally {
       con.close()
@@ -135,7 +136,7 @@ class PersonRepoImpl extends PersonRepo {
 
     }
     catch {
-      case e:Exception => e.printStackTrace()
+      case e:SQLException => e.printStackTrace()
     }
    finally {
      con.close()
@@ -154,10 +155,10 @@ class PersonRepoImpl extends PersonRepo {
          val age = resultSet.getInt("AGE")
          println(s"ID is $id and NAME is $name and AGE is $age")
       }
-//      connection.close()
+
     }
     catch {
-      case e:Exception => e.printStackTrace()
+      case e:SQLException => e.printStackTrace()
     }
     finally {
       con.close()
