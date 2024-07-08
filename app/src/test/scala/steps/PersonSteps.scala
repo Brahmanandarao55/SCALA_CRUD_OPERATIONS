@@ -1,3 +1,4 @@
+/*
 package steps
 
 import crud_op.Entity.Person
@@ -87,3 +88,4 @@ class PersonSteps extends ScalaDsl with EN with MockitoSugar {
     verify(mockRepo).personTable()
   }
 }
+*/

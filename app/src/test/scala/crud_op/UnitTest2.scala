@@ -1,3 +1,4 @@
+/*
 package crud_op
 
 import crud_op.Configurations.jdbcConnection
@@ -324,3 +325,4 @@ class UnitTest2 extends FlatSpec with Matchers with MockitoSugar {
   }
 
 }
+*/

@@ -5,12 +5,12 @@ import crud_op.Entity.Person
 trait PersonRepo {
 
 //  def jdbcConnection():Connection
-  def createPerson():Unit
-  def insertPerson(person: String): Unit
-  def getPerson(id:Option[Int]):Unit
-  def updatePerson(person: Person):Unit
-  def deletePerson(id:Option[Int]):Unit
-  def personTable():Unit
+  def createPerson():String
+  def insertPerson(person: String): String
+  def getPerson(id:Option[Int]):String
+  def updatePerson(person: Person, id:Int):String
+  def deletePerson(id:Option[Int]):String
+  def getAll():String
 
 
 
