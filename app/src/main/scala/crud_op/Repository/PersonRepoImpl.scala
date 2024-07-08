@@ -1,15 +1,16 @@
 package crud_op.Repository
+import com.opencsv.CSVWriter
 import com.typesafe.config.{Config, ConfigFactory}
 import crud_op.Entity.Person
 import org.slf4j.{Logger, LoggerFactory}
-import java.io.File
-import java.sql.{Connection, DriverManager, PreparedStatement, ResultSet, SQLException, Statement}
+
+import java.io.{File, FileWriter}
+import java.sql.{DriverManager, PreparedStatement, ResultSet, SQLException, Statement}
 import scala.io.Source
 
 class PersonRepoImpl extends PersonRepo {
 
   private val configurations: Config = ConfigFactory.load().getConfig("database")
-//  println(configurations.root().render())
   private val url: String = configurations.getString("url")
   private val host: String = configurations.getString("host")
   private val password: String = configurations.getString("pass")
@@ -29,7 +30,11 @@ class PersonRepoImpl extends PersonRepo {
         """
           |CREATE TABLE persontable (ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
           |NAME VARCHAR(26),
-          |AGE INT);""".stripMargin
+          |AGE INT,
+          |SALARY INT,
+          |PROFESSION VARCHAR(40),
+          |LOCATION VARCHAR(30));
+          |""".stripMargin
       val statement: Statement = con.createStatement()
       statement.executeUpdate(query)
 
@@ -58,12 +63,12 @@ class PersonRepoImpl extends PersonRepo {
       val lines = bufferedSource.getLines().drop(1)
       val person = lines.map { line =>
         val fields = line.split(",").map(_.trim)
-        Person(fields(0), fields(1).toInt)
+        Person(fields(0), fields(1).toInt, fields(2).toInt, fields(3), fields(4))
       }.toList
       con.setAutoCommit(false)
       val query: String =
         """
-          |INSERT INTO persontable (NAME, AGE) values(?,?);
+          |INSERT INTO persontable (NAME, AGE, SALARY, PROFESSION, LOCATION) values(?,?,?,?,?);
           |""".stripMargin
       val statement: PreparedStatement = con.prepareStatement(query)
       val batchSize = 1000
@@ -71,6 +76,9 @@ class PersonRepoImpl extends PersonRepo {
       person.foreach { persons =>
         statement.setString(1, persons.Name)
         statement.setInt(2, persons.Age)
+        statement.setInt(3, persons.Salary)
+        statement.setString(4, persons.Profession)
+        statement.setString(5,persons.Location)
         statement.addBatch()
         count+=1
       }
@@ -83,7 +91,7 @@ class PersonRepoImpl extends PersonRepo {
 
       val endTime = System.currentTimeMillis()
       val totalTimeSeconds = (endTime - startTime) / 1000.0
-      logger.info(s"Total insertion time: ${totalTimeSeconds} seconds")
+      logger.info(s"Total insertion time: $totalTimeSeconds seconds")
       "Data Insertion Successfully"
 
     }
@@ -112,9 +120,15 @@ class PersonRepoImpl extends PersonRepo {
         val id = resultset.getInt("ID")
         val name = resultset.getString("NAME")
         val age = resultset.getInt("AGE")
+        val salary = resultset.getString("SALARY")
+         val profession = resultset.getString("PROFESSION")
+         val location = resultset.getString("LOCATION")
         logger.info(s"id is $id")
         logger.info(s"name is $name")
         logger.info(s"age is $age")
+        logger.info(s"salary is $salary")
+        logger.info(s"profession is $profession")
+        logger.info(s"location is $location")
          "Getting Data Successfully"
 
       }
@@ -135,19 +149,26 @@ class PersonRepoImpl extends PersonRepo {
   }
 
   override def updatePerson(person: Person, id:Int): String = {
+    val ID = id
     try {
-      val query: String = "UPDATE personTable SET NAME = ?, AGE = ? WHERE ID = ?"
+      val query: String =
+        """
+          |UPDATE personTable SET NAME = ?, AGE = ?, SALARY = ?, PROFESSION = ?, LOCATION= ?
+          | WHERE ID = ?;
+          | """.stripMargin
       val statement: PreparedStatement = con.prepareStatement(query)
       statement.setString(1, person.Name)
       statement.setInt(2, person.Age)
-      statement.setInt(3, id)
+      statement.setInt(3, person.Salary)
+      statement.setString(4, person.Profession)
+      statement.setString(5, person.Location)
+      statement.setInt(6, ID)
       statement.executeUpdate()
-//      println(s"ROW WITH $id IS UPDATED")
-      s"ROW WITH $id IS UPDATED"
+      s"ROW WITH ID $id IS UPDATED"
     }
     catch {
       case e:SQLException => e.printStackTrace()
-        s"ROW WITH $id IS NOT UPDATED"
+        s"ROW WITH ID $id IS NOT UPDATED"
     }
     finally {
       con.close()
@@ -178,7 +199,7 @@ class PersonRepoImpl extends PersonRepo {
      }
 
     }
-
+/*
   override def getAll(): String = {
 
     try{
@@ -190,7 +211,7 @@ class PersonRepoImpl extends PersonRepo {
          val name = resultSet.getString("NAME")
          val age = resultSet.getInt("AGE")
 
-          println(s"ID is $id, NAME is $name, AGE is $age\n")
+         logger.info(s"ID is $id, NAME is $name, AGE is $age\n")
 
       }
       "Data fetched Successfully"
@@ -205,6 +226,42 @@ class PersonRepoImpl extends PersonRepo {
     finally {
       con.close()
     }
+
+  }*/
+
+  override def getAll(): String = {
+    val startTime = System.currentTimeMillis()
+     try{
+       con.setAutoCommit(false)
+
+       val query = "SELECT * FROM persontable"
+       val statement = con.createStatement()
+       val result = statement.executeQuery(query)
+       val filepath = "output.csv"
+       val csvWriter = new CSVWriter(new FileWriter(filepath))
+       val metadata =result.getMetaData
+       val columnCount = metadata.getColumnCount
+       while (result.next()) {
+         val row = (1 to columnCount).map(result.getString).toArray
+         csvWriter.writeNext(row)
+       }
+       csvWriter.close()
+       val endTime = System.currentTimeMillis()
+       val totalTimeSeconds = (endTime - startTime) / 1000.0
+
+       logger.info(s"Total insertion time: $totalTimeSeconds seconds")
+       "The output file name is output.csv"
+
+     }
+    catch{
+      case e:SQLException =>
+        e.printStackTrace()
+        "The output file is not generated and and data is not retried"
+    }
+     finally {
+       con.close()
+     }
+
 
   }
 }

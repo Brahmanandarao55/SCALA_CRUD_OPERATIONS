@@ -8,9 +8,9 @@ class PersonServiceImpl extends PersonService {
   override def createTable(): String = {
     obj.createPerson()
   }
-  override def insert(person: String): String = {
+  override def insert(filepath: String): String = {
 
-    obj.insertPerson(person:String)
+    obj.insertPerson(filepath:String)
 
   }
 
