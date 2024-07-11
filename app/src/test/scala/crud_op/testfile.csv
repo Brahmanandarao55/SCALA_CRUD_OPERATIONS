@@ -1,3 +1,2 @@
-Id,Name,Age
-1,John,25
-2,Jane,30  
+NAME,AGE,SALARY,PROFESSION,LOCATION
+Nandha,22,45000,Developer,Hyderabad

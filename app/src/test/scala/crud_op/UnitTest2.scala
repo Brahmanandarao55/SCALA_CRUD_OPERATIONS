@@ -1,7 +1,7 @@
 /*
 package crud_op
 
-import crud_op.Configurations.jdbcConnection
+
 import crud_op.Entity.Person
 import crud_op.Repository.PersonRepoImpl
 import org.mockito.ArgumentMatchers.{any, anyInt, anyString}
@@ -11,12 +11,12 @@ import org.scalatest.{FlatSpec, Matchers}
 
 import java.io.File
 import java.sql.{Connection, PreparedStatement, ResultSet, SQLException, Statement}
-import scala.io.{BufferedSource, Source}
+import scala.io. Source
 
 
 class UnitTest2 extends FlatSpec with Matchers with MockitoSugar {
 
-  "createPerson" should "create the table if it does not exist" in {
+  "Table" should "created if it does not exist" in {
 
     val mockConnection: Connection = mock[Connection]
     val mockStatement: Statement = mock[Statement]
@@ -29,79 +29,92 @@ class UnitTest2 extends FlatSpec with Matchers with MockitoSugar {
     repo.createPerson()
 
     verify(mockConnection).createStatement()
-    verify(mockStatement).executeUpdate(" CREATE TABLE IF NOT EXISTS persontable (ID INT PRIMARY KEY, NAME VARCHAR(26), AGE INT);")
+    verify(mockStatement).executeUpdate(
+      """
+        |CREATE TABLE PERSONTABLE (ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        |NAME VARCHAR(26),
+        |AGE INT,
+        |SALARY INT,
+        |PROFESSION VARCHAR(40),
+        |LOCATION VARCHAR(30));
+        |""".stripMargin)
     verify(mockConnection).close()
 
   }
 
-  it should "handle SQLException and not propagate it" in {
+
+  it should "handle SQLException during table creation" in {
 
     val mockConnection: Connection = mock[Connection]
     val mockStatement: Statement = mock[Statement]
-    val mockPreparedStatement = mock[PreparedStatement]
+
     when(mockConnection.createStatement()).thenReturn(mockStatement)
     when(mockStatement.executeUpdate(anyString())).thenThrow(new SQLException("SQL Exception"))
-    when(mockPreparedStatement.setInt(1, 1)).thenThrow(new SQLException("SQL error"))
-
-
 
     val repo = new PersonRepoImpl {
       override val con: Connection = mockConnection
     }
-
-
-    repo.createPerson()
-
+   val result = repo.createPerson()
 
     verify(mockConnection).createStatement()
-    verify(mockStatement).executeUpdate(anyString())
+    verify(mockStatement).executeUpdate(
+      """
+        |CREATE TABLE PERSONTABLE(ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        |NAME VARCHAR(26),
+        |AGE INT,
+        |SALARY INT,
+        |PROFESSION VARCHAR(40),
+        |LOCATION VARCHAR(30));
+        |""".stripMargin)
+    result should be ("Table is not Created")
+
+  }
+
+  "insertion data" should "come from CSV and inserted into  " in {
+
+    val filepath = "C:\\Users\\Brahmananda Rao\\Desktop\\TASK\\CRUD_OP\\app\\src\\test\\scala\\crud_op\\testfile.csv"
+    val mockConnection = mock[Connection]
+    val mockPreparedStatement = mock[PreparedStatement]
+    val mockFile = mock[File]
+    val mockSource = mock[Source]
+    when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement)
+    when(mockPreparedStatement.executeBatch()).thenReturn(Array(1))
+    when(mockSource.getLines()).thenReturn(Iterator("NAME,AGE,SALARY,PROFESSION,LOCATION","Nandha,22,45000,Developer,Hyderabad"))
+    when(mockFile.exists()).thenReturn(true)
+    when(mockFile.isFile).thenReturn(true)
+
+    val repo = new PersonRepoImpl {
+      override val con: Connection = mockConnection
+    }
+    val result = repo.insertPerson(filepath)
+
+
+    verify(mockPreparedStatement, times(1)).setString(1, "Nandha")
+    verify(mockPreparedStatement, times(1)).setInt(2, 22)
+    verify(mockPreparedStatement, times(1)).setInt(3, 45000)
+    verify(mockPreparedStatement, times(1)).setString(4, "Developer")
+    verify(mockPreparedStatement, times(1)).setString(5, "Hyderabad")
+    verify(mockPreparedStatement,times(1)).addBatch()
+    verify(mockPreparedStatement).executeBatch()
+    verify(mockConnection).commit()
+
+    result should be ("Data Insertion Successfully")
+
 
 
   }
 
-
-/*   "insertPerson" should "insert persons from the file into the database" in {
-
-     val mockConnection = mock[Connection]
-     val mockPreparedStatement = mock[PreparedStatement]
-
-     when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement)
-
-     val testDataFilePath = "C:\\Users\\Brahmananda Rao\\Desktop\\TASK\\CRUD_OP\\app\\src\\test\\scala\\crud_op\\testfile.csv"
-
-     val repo = new PersonRepoImpl {
-       override val con: Connection = mockConnection
-     }
-    repo.insertPerson(testDataFilePath)
-    val buffersource = Source.fromFile(new File(testDataFilePath))
-    val lines = buffersource.getLines().drop(1)
-    val person = lines.map { line =>
-      val fields = line.split(",").map(_.trim)
-      Person(fields(0).toInt, fields(1), fields(2).toInt)
-    }.toList
-
-   verify(mockConnection).prepareStatement( """
-                                              |INSERT INTO persontable values(?,?,?);
-                                              |""".stripMargin)
-
-
-     verify(mockPreparedStatement, times(4)).addBatch()
-     verify(mockPreparedStatement).executeBatch()
-     verify(mockConnection).commit()
-
-   }*/
-
-
-  "Connection Failed Error" should "Raised when Connection Failed for InsertPerson" in{
+  it should "handle SQLException during Insertion" in{
 
     val mockConnection = mock[Connection]
     val mockPreparedStatement = mock[PreparedStatement]
-    val filepath = "C:\\Users\\Brahmananda Rao\\Desktop\\TASK\\CRUD_OP\\app\\src\\test\\resources\\test.csv"
+    val filepath = "C:\\Users\\Brahmananda Rao\\Desktop\\TASK\\CRUD_OP\\app\\src\\test\\scala\\crud_op\\testfile.csv"
+
     when(mockConnection.prepareStatement(anyString)).thenReturn(mockPreparedStatement)
     when(mockPreparedStatement.executeBatch()).thenThrow(new SQLException("SQL EXCEPTION"))
 
-    val repo = new PersonRepoImpl{
-      override val con:Connection = mockConnection
+    val repo = new PersonRepoImpl {
+      override val con: Connection = mockConnection
     }
 
     repo.insertPerson(filepath)
@@ -111,6 +124,51 @@ class UnitTest2 extends FlatSpec with Matchers with MockitoSugar {
 
   }
 
+  "GetPerson" should "retrieve and print person details by ID" in {
+
+    val mockConnection = mock[Connection]
+    val mockPreparedStatement = mock[PreparedStatement]
+    val mockResultSet = mock[ResultSet]
+
+    when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement)
+    when(mockPreparedStatement.executeQuery()).thenReturn(mockResultSet)
+    when(mockResultSet.next()).thenReturn(true)
+    when(mockResultSet.getInt("ID")).thenReturn(1)
+    when(mockResultSet.getString("NAME")).thenReturn("Nandha")
+    when(mockResultSet.getInt("AGE")).thenReturn(22)
+    when(mockResultSet.getInt("SALARY")).thenReturn(45000)
+    when(mockResultSet.getString("PROFESSION")).thenReturn("Developer")
+    when(mockResultSet.getString("LOCATION")).thenReturn("Hyderabad")
+
+
+    val repo = new PersonRepoImpl{
+      override val con: Connection = mockConnection
+    }
+
+    repo.getPerson(Some(1))
+
+
+
+    verify(mockConnection).prepareStatement(anyString())
+    verify(mockPreparedStatement).setInt(1, 1)
+    verify(mockPreparedStatement).executeQuery()
+    verify(mockResultSet).next()
+    verify(mockResultSet).getInt("ID")
+    verify(mockResultSet).getString("NAME")
+    verify(mockResultSet).getInt("AGE")
+    verify(mockResultSet).getInt("SALARY")
+    verify(mockResultSet).getString("PROFESSION")
+    verify(mockResultSet).getString("LOCATION")
+
+    verify(mockConnection).close()
+
+
+  }
+
+
+}
+
+/*
   "getPerson" should "retrieve and print person details by ID" in {
     val mockConnection = mock[Connection]
     val mockPreparedStatement = mock[PreparedStatement]
@@ -324,5 +382,5 @@ class UnitTest2 extends FlatSpec with Matchers with MockitoSugar {
 
   }
 
-}
+}*/
 */

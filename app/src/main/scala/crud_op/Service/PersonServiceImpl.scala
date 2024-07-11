@@ -3,7 +3,7 @@ import crud_op.Entity.Person
 import crud_op.Repository.PersonRepoImpl
 class PersonServiceImpl extends PersonService {
 
-  private val obj = new PersonRepoImpl
+   val obj = new PersonRepoImpl
 
   override def createTable(): String = {
     obj.createPerson()
