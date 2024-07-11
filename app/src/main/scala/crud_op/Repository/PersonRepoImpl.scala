@@ -58,7 +58,7 @@ class PersonRepoImpl extends PersonRepo {
       val bufferedSource = Source.fromFile(new File(filepath))
       val lines = bufferedSource.getLines().drop(1)
       val person = lines.map { line =>
-        val fields = line.split(",").map(_.trim)
+        val fields = line.split(",").map(_.trim.stripPrefix("\"").stripSuffix("\""))
         Person(fields(0), fields(1).toInt, fields(2).toInt, fields(3), fields(4), fields(5).toFloat, fields(6).charAt(0))
       }.toList
       connection.setAutoCommit(false)
@@ -166,8 +166,12 @@ class PersonRepoImpl extends PersonRepo {
       statement.setFloat(6, person.Rating)
       statement.setString(7, String.valueOf(person.Block))
       statement.setInt(8, ID)
-      statement.executeUpdate()
-      s"ROW WITH ID $id IS UPDATED"
+      val result = statement.executeUpdate()
+      if(result >0)
+        s"ROW WITH ID $id IS UPDATED"
+      else
+        throw new SQLException("ROW IS NOT AVAILABLE")
+
     }
     catch {
       case e: SQLException => e.printStackTrace()

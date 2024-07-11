@@ -4,6 +4,7 @@ import com.typesafe.config.{Config, ConfigFactory}
 import org.slf4j.{Logger, LoggerFactory}
 
 import java.sql.{Connection, DriverManager}
+import scala.util.Try
 
 object DatabaseConnection {
   private val configurations: Config = ConfigFactory.load().getConfig("database")
