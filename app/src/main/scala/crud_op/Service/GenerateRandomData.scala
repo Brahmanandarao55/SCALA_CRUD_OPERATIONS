@@ -1,4 +1,4 @@
-package crud_op.Repository
+package crud_op.Service
 
 import com.opencsv.CSVWriter
 import org.slf4j.{Logger, LoggerFactory}
@@ -6,10 +6,11 @@ import org.slf4j.{Logger, LoggerFactory}
 import java.io.FileWriter
 import scala.util.Random
 
-class GenrateRandomData {
+class GenerateRandomData {
 
   val logger: Logger = LoggerFactory.getLogger(getClass)
-  def genrateData():Unit= {
+
+  def generateData(): Unit = {
     val numRows = 100000
     val names = Array("John", "Jane", "Alice", "Bob", "Charlie", "David", "Eve", "Frank", "Grace", "Hank")
     val professions = Array("Engineer", "Doctor", "Teacher", "Artist", "Musician", "Lawyer", "Scientist", "Chef", "Writer", "Designer")

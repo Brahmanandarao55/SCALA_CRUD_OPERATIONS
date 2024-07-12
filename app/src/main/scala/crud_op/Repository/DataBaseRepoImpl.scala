@@ -1,27 +1,26 @@
 package crud_op.Repository
 
 import com.opencsv.CSVWriter
-import com.typesafe.config.{Config, ConfigFactory}
 import crud_op.Entity.Person
+import crud_op.Service.DatabaseConnection
 import org.slf4j.{Logger, LoggerFactory}
 
 import java.io.{File, FileWriter}
-import java.sql.{Connection, DriverManager, PreparedStatement, ResultSet, SQLException, Statement}
+import java.sql.{Connection, PreparedStatement, ResultSet, SQLException, Statement}
 import scala.io.Source
 
-class PersonRepoImpl extends PersonRepo {
-
-
+class DataBaseRepoImpl extends DataBaseRepo {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass)
   val connection: Connection = DatabaseConnection.getConnection
-  override def createPerson(): String = {
+
+  override def createTable(): String = {
 
     try {
 
       val query: String =
         """
-          |CREATE TABLE PERSONTABLE (ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+          |CREATE TABLE PERSONTABLE (ID INT NOT NULL IDENTITY PRIMARY KEY,
           |NAME VARCHAR(26),
           |AGE INT,
           |SALARY INT,
@@ -43,16 +42,16 @@ class PersonRepoImpl extends PersonRepo {
 
         "Table is not Created"
     }
-   /* finally {
+    /* finally {
 
-      connection.close()
+       connection.close()
 
-    }*/
+     }*/
 
 
   }
 
-  override def insertPerson(filepath: String): String = {
+  override def insertData(filepath: String): String = {
     try {
       val startTime = System.currentTimeMillis()
       val bufferedSource = Source.fromFile(new File(filepath))
@@ -76,7 +75,7 @@ class PersonRepoImpl extends PersonRepo {
         statement.setString(4, persons.Profession)
         statement.setString(5, persons.Location)
         statement.setFloat(6, persons.Rating)
-        statement.setString(7,String.valueOf(persons.Block))
+        statement.setString(7, String.valueOf(persons.Block))
         statement.addBatch()
         count += 1
       }
@@ -100,10 +99,9 @@ class PersonRepoImpl extends PersonRepo {
     }
 
 
-
   }
 
-  override def getPerson(id: Option[Int]): String = {
+  override def getDataById(id: Option[Int]): String = {
     try {
       val query =
         """
@@ -149,7 +147,7 @@ class PersonRepoImpl extends PersonRepo {
 
   }
 
-  override def updatePerson(person: Person, id: Int): String = {
+  override def updateData(person: Person, id: Int): String = {
     val ID = id
     try {
       val query: String =
@@ -167,7 +165,7 @@ class PersonRepoImpl extends PersonRepo {
       statement.setString(7, String.valueOf(person.Block))
       statement.setInt(8, ID)
       val result = statement.executeUpdate()
-      if(result >0)
+      if (result > 0)
         s"ROW WITH ID $id IS UPDATED"
       else
         throw new SQLException("ROW IS NOT AVAILABLE")
@@ -180,7 +178,7 @@ class PersonRepoImpl extends PersonRepo {
 
   }
 
-  override def deletePerson(id: Option[Int]): String = {
+  override def deleteData(id: Option[Int]): String = {
     try {
       val query: String =
         """
@@ -232,7 +230,7 @@ class PersonRepoImpl extends PersonRepo {
 
     }*/
 
-  override def getAll(): String = {
+  override def getAll: String = {
     val startTime = System.currentTimeMillis()
     try {
       connection.setAutoCommit(false)
@@ -261,7 +259,6 @@ class PersonRepoImpl extends PersonRepo {
         e.printStackTrace()
         "The output file is not generated and and data is not retried"
     }
-
 
 
   }
