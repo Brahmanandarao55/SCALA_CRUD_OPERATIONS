@@ -1,7 +1,9 @@
 configurations {
-    cucumberRuntime {
+    cucumberRuntime{
         extendsFrom testImplementation
     }
+
+
 }
 
 tasks.register('cucumber', JavaExec) {
