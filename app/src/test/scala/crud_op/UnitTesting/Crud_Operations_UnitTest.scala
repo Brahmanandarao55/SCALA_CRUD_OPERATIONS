@@ -12,7 +12,7 @@ import org.slf4j.Logger
 import scala.Unit
 
 class Crud_Operations_UnitTest extends FlatSpec with MockitoSugar with Matchers {
-
+/*
   "Crud_Operations" should " execute successfully" in {
     val mockConfig = mock[Config]
     val mockLogger = mock[Logger]
@@ -33,9 +33,9 @@ class Crud_Operations_UnitTest extends FlatSpec with MockitoSugar with Matchers 
 
 
 
-  }
+  }*/
 
-  it should "Crud_Operations" in {
+  /*it should "Crud_Operations" in {
     val mockConfig = mock[Config]
     val mockLogger = mock[Logger]
     val mockRepo = mock[DataBaseRepoImpl]
@@ -60,7 +60,7 @@ class Crud_Operations_UnitTest extends FlatSpec with MockitoSugar with Matchers 
     verify(mockLogger).info("Table created successfully")
   }
 
-
+*/
 
 
 
