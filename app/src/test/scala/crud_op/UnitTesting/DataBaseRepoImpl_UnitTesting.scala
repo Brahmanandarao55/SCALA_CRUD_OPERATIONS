@@ -1,13 +1,11 @@
 package crud_op.UnitTesting
 
 import crud_op.Repository.DataBaseRepoImpl
-import org.apache.poi.ss.formula.functions.Intercept
 import org.mockito.ArgumentMatchers.anyString
-import org.mockito.Mockito.{doNothing, doReturn, times, verify, when}
+import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.{FlatSpec, Matchers}
 import org.scalatestplus.mockito.MockitoSugar
 
-import java.io.File
 import java.sql.{Connection, PreparedStatement, ResultSet, SQLException, Statement}
 import scala.io.Source
 
@@ -118,76 +116,50 @@ class DataBaseRepoImpl_UnitTesting extends FlatSpec with MockitoSugar with Match
     result shouldBe actual
   }
 
-/*  "Data" should "retrieve by ID" in {
-    val mockConnection: Connection = mock[Connection]
-    val mockPreparedStatement: PreparedStatement = mock[PreparedStatement]
+  "Data" should "retrieve by Id" in {
+
+    val mockConnection = mock[Connection]
+    val mockPreparedStatement = mock[PreparedStatement]
     val mockResultSet = mock[ResultSet]
 
     when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement)
-    when(mockPreparedStatement.executeQuery(anyString())).thenReturn(mockResultSet)
-
+    when(mockPreparedStatement.executeQuery()).thenReturn(mockResultSet)
     when(mockResultSet.next()).thenReturn(true)
-    when(mockResultSet.getInt("ID")).thenReturn(1)
-    when(mockResultSet.getString("NAME")).thenReturn("Nandha")
-    when(mockResultSet.getInt("AGE")).thenReturn(22)
-    when(mockResultSet.getInt("SALARY")).thenReturn(45000)
-    when(mockResultSet.getString("PROFESSION")).thenReturn("Developer")
-    when(mockResultSet.getString("LOCATION")).thenReturn("Hyderabad")
-
-    println("Creating repo...")
-    val repo: DataBaseRepoImpl = new DataBaseRepoImpl{
-      override val connection: Connection = mockConnection
-    }
-    println("Repo created: " + repo)
-
-
-
-    val result = repo.getDataById(Some(1))
-
-
-    val actual = "Getting Data Successfully"
-
-
-
-
-    verify(mockConnection).prepareStatement(anyString())
-
-
-    verify(mockPreparedStatement).setInt(1,1)
-    verify(mockPreparedStatement).executeQuery()
-    verify(mockResultSet).next()
-    verify(mockResultSet).getInt("ID")
-    verify(mockResultSet).getString("NAME")
-    verify(mockResultSet).getInt("AGE")
-    verify(mockResultSet).getInt("SALARY")
-    verify(mockResultSet).getString("PROFESSION")
-    verify(mockResultSet).getString("LOCATION")
-
-
-    result should be(actual)
-
-  }*/
-
-
- /* "When Data is None it" should "raise Exception" in {
-
-    val mockConnection = mock[Connection]
 
     val repo = new DataBaseRepoImpl{
       override val connection: Connection = mockConnection
     }
 
-    when(mockConnection.prepareStatement(anyString())).thenThrow(new SQLException("Error"))
+    val result = repo.getDataById(Some(1))
 
-    val result = intercept[SQLException] {
+    val actual = "Getting Data Successfully"
+
+    verify(mockConnection).prepareStatement(anyString())
+    verify(mockResultSet).next()
+
+    result shouldBe actual
+  }
+
+
+  "When Data is None it" should "raise Exception" in {
+
+    val mockConnection = mock[Connection]
+    val mockPreparedStatement = mock[PreparedStatement]
+    when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement)
+    val repo = new DataBaseRepoImpl{
+      override val connection: Connection = mockConnection
+    }
+
+   intercept[IllegalArgumentException] {
       repo.getDataById(None)
     }
 
-    println(result)
 
     verify(mockConnection).prepareStatement(anyString())
 
+
+
   }
-*/
+
 
 }
