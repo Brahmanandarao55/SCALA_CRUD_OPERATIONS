@@ -4,7 +4,7 @@ import com.opencsv.CSVWriter
 import crud_op.main.MainAdapter.logger
 import org.slf4j.{Logger, LoggerFactory}
 
-import java.io.FileWriter
+import java.io.{FileWriter, IOException}
 import scala.util.Random
 
 class GenerateRandomData {
@@ -44,7 +44,7 @@ class GenerateRandomData {
 
     }
     catch {
-      case e:Exception => logger.error(s"Connection Failed ${e.getMessage}")
+      case e:IOException => logger.error(s"CSV file is not generated because of Invalid Path ${e.getMessage}")
     }
   }
 

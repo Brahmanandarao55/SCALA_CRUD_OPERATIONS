@@ -42,11 +42,7 @@ class DataBaseRepoImpl extends DataBaseRepo {
 
         "Table is not Created"
     }
-    /* finally {
 
-       connection.close()
-
-     }*/
 
 
   }
@@ -132,9 +128,7 @@ class DataBaseRepoImpl extends DataBaseRepo {
 
       }
       else {
-
         throw new IllegalArgumentException(s"Person with ID $id not found")
-
 
       }
 
