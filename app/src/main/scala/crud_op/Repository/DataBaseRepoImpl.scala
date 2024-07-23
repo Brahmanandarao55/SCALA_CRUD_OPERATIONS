@@ -5,7 +5,7 @@ import crud_op.Entity.Person
 import crud_op.Service.DatabaseConnection
 import org.slf4j.{Logger, LoggerFactory}
 
-import java.io.{File, FileWriter}
+import java.io.{ByteArrayInputStream, File, FileWriter}
 import java.sql.{Connection, PreparedStatement, ResultSet, SQLException, Statement}
 import scala.io.Source
 
