@@ -3,7 +3,6 @@ package crud_op.Service
 import com.typesafe.config.{Config, ConfigFactory}
 import crud_op.Entity.Person
 import crud_op.Repository.DataBaseRepoImpl
-import crud_op.main.MainAdapter.logger
 import org.slf4j.{Logger, LoggerFactory}
 
 import java.io.EOFException
