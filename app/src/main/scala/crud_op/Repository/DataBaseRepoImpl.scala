@@ -5,7 +5,7 @@ import crud_op.Entity.Person
 import crud_op.Service.DatabaseConnection
 import org.slf4j.{Logger, LoggerFactory}
 
-import java.io.{ByteArrayInputStream, File, FileWriter}
+import java.io.{File, FileWriter}
 import java.sql.{Connection, PreparedStatement, ResultSet, SQLException, Statement}
 import scala.io.Source
 
@@ -74,10 +74,13 @@ class DataBaseRepoImpl extends DataBaseRepo {
         statement.setString(7, String.valueOf(persons.Block))
         statement.addBatch()
         count += 1
+
       }
+
       if (count % batchSize == 0) {
         statement.executeBatch()
       }
+
       statement.executeBatch()
       bufferedSource.close()
       connection.commit()
@@ -88,6 +91,7 @@ class DataBaseRepoImpl extends DataBaseRepo {
       "Data Insertion Successfully"
 
     }
+
     catch {
       case e: SQLException => e.printStackTrace()
         if (connection != null) connection.rollback()

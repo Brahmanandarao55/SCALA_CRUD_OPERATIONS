@@ -17,7 +17,6 @@ object MainAdapter extends App {
   private val csvFilePath = "C:\\Users\\brahmananda Rao\\Desktop\\data.csv"
 
   private def check(): Unit = {
-    val Crud_Object = new Crud_Operations
     val connection: Try[Connection] = Try {
       DatabaseConnection.getConnection
     }
@@ -25,15 +24,9 @@ object MainAdapter extends App {
     connection match {
       case Success(_) =>
         logger.info("Connection has been successfully established!")
-        if (!file.exists() || file.length() == 0) {
           val x = new GenerateRandomData
-          x.generateData(csvFilePath)
-          Crud_Object.menu()
-        }
-        else {
-          logger.info("File is already there")
-          Crud_Object.menu()
-        }
+          x.generateData(csvFilePath, file)
+
 
       case Failure(exception) =>
         logger.error(s"Connection Failed ${exception.getMessage}")
@@ -43,5 +36,6 @@ object MainAdapter extends App {
   }
 
   check()
+
 }
 

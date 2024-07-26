@@ -1,0 +1,379 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DataBaseRepoImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">crud_op.Repository</a>
+</div>
+
+<h1>Coverage Summary for Class: DataBaseRepoImpl (crud_op.Repository)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DataBaseRepoImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/112)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package crud_op.Repository
+&nbsp;
+&nbsp;import com.opencsv.CSVWriter
+&nbsp;import crud_op.Entity.Person
+&nbsp;import crud_op.Service.DatabaseConnection
+&nbsp;import org.slf4j.{Logger, LoggerFactory}
+&nbsp;
+&nbsp;import java.io.{File, FileWriter}
+&nbsp;import java.sql.{Connection, PreparedStatement, ResultSet, SQLException, Statement}
+&nbsp;import scala.io.Source
+&nbsp;
+<b class="nc">&nbsp;class DataBaseRepoImpl extends DataBaseRepo {</b>
+&nbsp;
+<b class="nc">&nbsp;  private val logger: Logger = LoggerFactory.getLogger(getClass)</b>
+<b class="nc">&nbsp;  val connection: Connection = DatabaseConnection.getConnection</b>
+&nbsp;
+&nbsp;  override def createTable(): String = {
+&nbsp;
+&nbsp;    try {
+&nbsp;
+&nbsp;      val query: String =
+<b class="nc">&nbsp;        &quot;&quot;&quot;</b>
+&nbsp;          |CREATE TABLE PERSONTABLE (ID INT NOT NULL IDENTITY PRIMARY KEY,
+&nbsp;          |NAME VARCHAR(26),
+&nbsp;          |AGE INT,
+&nbsp;          |SALARY INT,
+&nbsp;          |PROFESSION VARCHAR(40),
+&nbsp;          |LOCATION VARCHAR(30),
+&nbsp;          |RATING FLOAT,
+&nbsp;          |BLOCK CHAR(3));
+&nbsp;          |&quot;&quot;&quot;.stripMargin
+&nbsp;
+<b class="nc">&nbsp;      val statement: Statement = connection.createStatement()</b>
+<b class="nc">&nbsp;      statement.executeUpdate(query)</b>
+&nbsp;
+<b class="nc">&nbsp;      &quot;Table Created Successfully&quot;</b>
+&nbsp;    }
+&nbsp;    catch {
+&nbsp;
+&nbsp;      case s: SQLException =&gt;
+<b class="nc">&nbsp;        s.printStackTrace()</b>
+&nbsp;
+<b class="nc">&nbsp;        &quot;Table is not Created&quot;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;  }
+&nbsp;
+&nbsp;  override def insertData(filepath: String): String = {
+&nbsp;    try {
+<b class="nc">&nbsp;      val startTime = System.currentTimeMillis()</b>
+<b class="nc">&nbsp;      val bufferedSource = Source.fromFile(new File(filepath))</b>
+<b class="nc">&nbsp;      val lines = bufferedSource.getLines().drop(1)</b>
+<b class="nc">&nbsp;      val person = lines.map { line =&gt;</b>
+<b class="nc">&nbsp;        val fields = line.split(&quot;,&quot;).map(_.trim.stripPrefix(&quot;\&quot;&quot;).stripSuffix(&quot;\&quot;&quot;))</b>
+<b class="nc">&nbsp;        Person(fields(0), fields(1).toInt, fields(2).toInt, fields(3), fields(4), fields(5).toFloat, fields(6).charAt(0))</b>
+&nbsp;      }.toList
+<b class="nc">&nbsp;      connection.setAutoCommit(false)</b>
+&nbsp;      val query: String =
+<b class="nc">&nbsp;        &quot;&quot;&quot;</b>
+&nbsp;          |INSERT INTO PERSONTABLE (NAME, AGE, SALARY, PROFESSION, LOCATION, RATING, BLOCK) values(?,?,?,?,?,?,?);
+&nbsp;          |&quot;&quot;&quot;.stripMargin
+<b class="nc">&nbsp;      val statement: PreparedStatement = connection.prepareStatement(query)</b>
+<b class="nc">&nbsp;      val batchSize = 1000</b>
+<b class="nc">&nbsp;      var count = 0</b>
+<b class="nc">&nbsp;      person.foreach { persons =&gt;</b>
+<b class="nc">&nbsp;        statement.setString(1, persons.Name)</b>
+<b class="nc">&nbsp;        statement.setInt(2, persons.Age)</b>
+<b class="nc">&nbsp;        statement.setInt(3, persons.Salary)</b>
+<b class="nc">&nbsp;        statement.setString(4, persons.Profession)</b>
+<b class="nc">&nbsp;        statement.setString(5, persons.Location)</b>
+<b class="nc">&nbsp;        statement.setFloat(6, persons.Rating)</b>
+<b class="nc">&nbsp;        statement.setString(7, String.valueOf(persons.Block))</b>
+<b class="nc">&nbsp;        statement.addBatch()</b>
+<b class="nc">&nbsp;        count += 1</b>
+&nbsp;
+&nbsp;      }
+&nbsp;
+<b class="nc">&nbsp;      if (count % batchSize == 0) {</b>
+<b class="nc">&nbsp;        statement.executeBatch()</b>
+&nbsp;      }
+&nbsp;
+<b class="nc">&nbsp;      statement.executeBatch()</b>
+<b class="nc">&nbsp;      bufferedSource.close()</b>
+<b class="nc">&nbsp;      connection.commit()</b>
+&nbsp;
+<b class="nc">&nbsp;      val endTime = System.currentTimeMillis()</b>
+<b class="nc">&nbsp;      val totalTimeSeconds = (endTime - startTime) / 1000.0</b>
+<b class="nc">&nbsp;      logger.info(s&quot;Total insertion time: $totalTimeSeconds seconds&quot;)</b>
+<b class="nc">&nbsp;      &quot;Data Insertion Successfully&quot;</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    catch {
+<b class="nc">&nbsp;      case e: SQLException =&gt; e.printStackTrace()</b>
+<b class="nc">&nbsp;        if (connection != null) connection.rollback()</b>
+<b class="nc">&nbsp;        &quot;Data Insertion Failed Here&quot;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;  }
+&nbsp;
+&nbsp;  override def getDataById(id: Option[Int]): String = {
+&nbsp;    try {
+&nbsp;      val query =
+<b class="nc">&nbsp;        &quot;&quot;&quot;</b>
+&nbsp;          |SELECT * FROM PERSONTABLE WHERE ID = ?;
+&nbsp;          |&quot;&quot;&quot;.stripMargin
+<b class="nc">&nbsp;      val statement: PreparedStatement = connection.prepareStatement(query)</b>
+<b class="nc">&nbsp;      statement.setInt(1, id.getOrElse(throw new IllegalArgumentException(&quot;GIVEN ID IS INVALID&quot;)))</b>
+<b class="nc">&nbsp;      val resultSet: ResultSet = statement.executeQuery()</b>
+<b class="nc">&nbsp;      if (resultSet.next()) {</b>
+<b class="nc">&nbsp;        val id = resultSet.getInt(&quot;ID&quot;)</b>
+<b class="nc">&nbsp;        val name = resultSet.getString(&quot;NAME&quot;)</b>
+<b class="nc">&nbsp;        val age = resultSet.getInt(&quot;AGE&quot;)</b>
+<b class="nc">&nbsp;        val salary = resultSet.getString(&quot;SALARY&quot;)</b>
+<b class="nc">&nbsp;        val profession = resultSet.getString(&quot;PROFESSION&quot;)</b>
+<b class="nc">&nbsp;        val location = resultSet.getString(&quot;LOCATION&quot;)</b>
+<b class="nc">&nbsp;        val rating = resultSet.getFloat(&quot;RATING&quot;)</b>
+<b class="nc">&nbsp;        val block = resultSet.getString(&quot;BLOCK&quot;)</b>
+<b class="nc">&nbsp;        logger.info(s&quot;id is $id&quot;)</b>
+<b class="nc">&nbsp;        logger.info(s&quot;name is $name&quot;)</b>
+<b class="nc">&nbsp;        logger.info(s&quot;age is $age&quot;)</b>
+<b class="nc">&nbsp;        logger.info(s&quot;salary is $salary&quot;)</b>
+<b class="nc">&nbsp;        logger.info(s&quot;profession is $profession&quot;)</b>
+<b class="nc">&nbsp;        logger.info(s&quot;location is $location&quot;)</b>
+<b class="nc">&nbsp;        logger.info(s&quot;rating is $rating&quot;)</b>
+<b class="nc">&nbsp;        logger.info(s&quot;block is $block&quot;)</b>
+&nbsp;
+<b class="nc">&nbsp;        &quot;Getting Data Successfully&quot;</b>
+&nbsp;
+&nbsp;      }
+&nbsp;      else {
+<b class="nc">&nbsp;        throw new IllegalArgumentException(s&quot;Person with ID $id not found&quot;)</b>
+&nbsp;
+&nbsp;      }
+&nbsp;
+&nbsp;
+&nbsp;    }
+&nbsp;    catch {
+<b class="nc">&nbsp;      case e: SQLException =&gt; e.printStackTrace()</b>
+<b class="nc">&nbsp;        &quot;Getting Data Unsuccessfully&quot;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;  }
+&nbsp;
+&nbsp;  override def updateData(person: Person, id: Int): String = {
+<b class="nc">&nbsp;    val ID = id</b>
+&nbsp;    try {
+&nbsp;      val query: String =
+<b class="nc">&nbsp;        &quot;&quot;&quot;</b>
+&nbsp;          |UPDATE PERSONTABLE SET NAME = ?, AGE = ?, SALARY = ?, PROFESSION = ?, LOCATION= ?, RATING = ?, BLOCK = ?
+&nbsp;          | WHERE ID = ?;
+&nbsp;          | &quot;&quot;&quot;.stripMargin
+<b class="nc">&nbsp;      val statement: PreparedStatement = connection.prepareStatement(query)</b>
+<b class="nc">&nbsp;      statement.setString(1, person.Name)</b>
+<b class="nc">&nbsp;      statement.setInt(2, person.Age)</b>
+<b class="nc">&nbsp;      statement.setInt(3, person.Salary)</b>
+<b class="nc">&nbsp;      statement.setString(4, person.Profession)</b>
+<b class="nc">&nbsp;      statement.setString(5, person.Location)</b>
+<b class="nc">&nbsp;      statement.setFloat(6, person.Rating)</b>
+<b class="nc">&nbsp;      statement.setString(7, String.valueOf(person.Block))</b>
+<b class="nc">&nbsp;      statement.setInt(8, ID)</b>
+<b class="nc">&nbsp;      val result = statement.executeUpdate()</b>
+<b class="nc">&nbsp;      if (result &gt; 0)</b>
+<b class="nc">&nbsp;        s&quot;ROW WITH ID $id IS UPDATED&quot;</b>
+&nbsp;      else
+<b class="nc">&nbsp;        throw new SQLException(&quot;ROW IS NOT AVAILABLE&quot;)</b>
+&nbsp;
+&nbsp;    }
+&nbsp;    catch {
+<b class="nc">&nbsp;      case e: SQLException =&gt; e.printStackTrace()</b>
+<b class="nc">&nbsp;        s&quot;ROW WITH ID $id IS NOT UPDATED&quot;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;  }
+&nbsp;
+&nbsp;  override def deleteData(id: Option[Int]): String = {
+&nbsp;    try {
+&nbsp;      val query: String =
+<b class="nc">&nbsp;        &quot;&quot;&quot;</b>
+&nbsp;          |DELETE FROM PERSONTABLE WHERE ID = ?;
+&nbsp;          |&quot;&quot;&quot;.stripMargin
+<b class="nc">&nbsp;      val statement: PreparedStatement = connection.prepareStatement(query)</b>
+<b class="nc">&nbsp;      statement.setInt(1, id.getOrElse(throw new IllegalArgumentException(&quot;ENTERED ID IS NOT VALID&quot;)))</b>
+<b class="nc">&nbsp;      val rowDelete = statement.executeUpdate()</b>
+<b class="nc">&nbsp;      if (rowDelete &gt; 0)</b>
+<b class="nc">&nbsp;        &quot;ROW DELETED SUCCESSFULLY&quot;</b>
+&nbsp;      else
+<b class="nc">&nbsp;        throw new SQLException(&quot;ROW IS NOT AVAILABLE&quot;)</b>
+&nbsp;    }
+&nbsp;    catch {
+<b class="nc">&nbsp;      case e: SQLException =&gt; e.printStackTrace()</b>
+<b class="nc">&nbsp;        s&quot;ROW WITH ID $id IS NOT DELETED &quot;</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;  }
+&nbsp;  /*
+&nbsp;    override def getAll(): String = {
+&nbsp;
+&nbsp;      try{
+&nbsp;        val query = &quot;SELECT * FROM persontable&quot;
+&nbsp;        val statement = con.createStatement()
+&nbsp;        val resultSet:ResultSet = statement.executeQuery(query)
+&nbsp;        while(resultSet.next()){
+&nbsp;           val id = resultSet.getInt(&quot;ID&quot;)
+&nbsp;           val name = resultSet.getString(&quot;NAME&quot;)
+&nbsp;           val age = resultSet.getInt(&quot;AGE&quot;)
+&nbsp;
+&nbsp;           logger.info(s&quot;ID is $id, NAME is $name, AGE is $age\n&quot;)
+&nbsp;
+&nbsp;        }
+&nbsp;        &quot;Data fetched Successfully&quot;
+&nbsp;
+&nbsp;      }
+&nbsp;      catch {
+&nbsp;        case e:SQLException =&gt;
+&nbsp;          e.printStackTrace()
+&nbsp;          &quot;Error retrieving data from database&quot;
+&nbsp;      }
+&nbsp;
+&nbsp;      finally {
+&nbsp;        con.close()
+&nbsp;      }
+&nbsp;
+&nbsp;    }*/
+&nbsp;
+&nbsp;  override def getAll: String = {
+<b class="nc">&nbsp;    val startTime = System.currentTimeMillis()</b>
+&nbsp;    try {
+<b class="nc">&nbsp;      connection.setAutoCommit(false)</b>
+&nbsp;
+<b class="nc">&nbsp;      val query = &quot;SELECT * FROM PERSONTABLE&quot;</b>
+<b class="nc">&nbsp;      val statement = connection.createStatement()</b>
+<b class="nc">&nbsp;      val result = statement.executeQuery(query)</b>
+<b class="nc">&nbsp;      val filepath = &quot;output.csv&quot;</b>
+<b class="nc">&nbsp;      val csvWriter = new CSVWriter(new FileWriter(filepath))</b>
+<b class="nc">&nbsp;      val metadata = result.getMetaData</b>
+<b class="nc">&nbsp;      val columnCount = metadata.getColumnCount</b>
+<b class="nc">&nbsp;      while (result.next()) {</b>
+<b class="nc">&nbsp;        val row = (1 to columnCount).map(result.getString).toArray</b>
+<b class="nc">&nbsp;        csvWriter.writeNext(row)</b>
+&nbsp;      }
+<b class="nc">&nbsp;      csvWriter.close()</b>
+<b class="nc">&nbsp;      val endTime = System.currentTimeMillis()</b>
+<b class="nc">&nbsp;      val totalTimeSeconds = (endTime - startTime) / 1000.0</b>
+&nbsp;
+<b class="nc">&nbsp;      logger.info(s&quot;Total retrieving time: $totalTimeSeconds seconds&quot;)</b>
+<b class="nc">&nbsp;      &quot;The output file name is output.csv&quot;</b>
+&nbsp;
+&nbsp;    }
+&nbsp;    catch {
+&nbsp;      case e: SQLException =&gt;
+<b class="nc">&nbsp;        e.printStackTrace()</b>
+<b class="nc">&nbsp;        &quot;The output file is not generated and and data is not retried&quot;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;  }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-07-26 11:19</div>
+</div>
+</body>
+</html>
