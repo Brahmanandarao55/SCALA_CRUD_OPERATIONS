@@ -1,14 +1,16 @@
 package crud_op.UnitTesting
 
+import com.opencsv.CSVWriter
 import com.opencsv.bean.processor.PreAssignmentProcessor
 import crud_op.Entity.Person
 import crud_op.Repository.DataBaseRepoImpl
 import org.mockito.ArgumentMatchers.anyString
-import org.mockito.Mockito.{times, verify, when}
+import org.mockito.Mockito.{doNothing, times, verify, when}
 import org.scalatest.{FlatSpec, Matchers}
 import org.scalatestplus.mockito.MockitoSugar
 
-import java.sql.{Connection, PreparedStatement, ResultSet, SQLException, Statement}
+import java.io.FileWriter
+import java.sql.{Connection, PreparedStatement, ResultSet, ResultSetMetaData, SQLException, Statement}
 import scala.io.Source
 
 class DataBaseRepoImpl_UnitTesting extends FlatSpec with MockitoSugar with Matchers {
@@ -337,30 +339,70 @@ class DataBaseRepoImpl_UnitTesting extends FlatSpec with MockitoSugar with Match
 
   }
 
-/*  "All data" should "retrieve by the getAll method" in {
+  "All data" should "retrieve by the getAll method" in {
 
+    /*val output = "Nandha.csv"
     val mockConnection = mock[Connection]
-    val mockStatement  = mock[Statement]
-    val mockResultSet  = mock[ResultSet]
+    val mockStatement = mock[Statement]
+    val mockResultSet = mock[ResultSet]
+    val  mockResultSetMetaData = mock[ResultSetMetaData]
+    val mockCSVWrite = mock[CSVWriter]
+    val mockFileWriter = mock[FileWriter]
 
+    val actual = "The output file name is output.csv"
+    val row = 1
 
     when(mockConnection.createStatement()).thenReturn(mockStatement)
     when(mockStatement.executeQuery(anyString())).thenReturn(mockResultSet)
-
+    when(mockResultSet.getMetaData).thenReturn(mockResultSetMetaData)
+    when(mockResultSetMetaData.getColumnCount).thenReturn(1)
+    when(mockResultSet.next()).thenReturn(true)
 
 
     val repo = new DataBaseRepoImpl{
       override val connection: Connection = mockConnection
     }
 
-    println(mockConnection)
-    println(mockStatement)
-    repo.getAll
+    val result = repo.getAll
+
+
+    result shouldBe actual
 
     verify(mockConnection).createStatement()
     verify(mockStatement).executeQuery(anyString())
+    verify(mockResultSet).getMetaData
 
   }*/
+
+    val mockConnection = mock[Connection]
+    val mockStatement = mock[Statement]
+    val mockResultSet = mock[ResultSet]
+    val mockMetaData = mock[ResultSetMetaData]
+    val filepath = "nandha.csv"
+    val mockFileWriter = new FileWriter(filepath)
+    val csvWriter = new CSVWriter(mockFileWriter)
+
+    when(mockConnection.createStatement()).thenReturn(mockStatement)
+    when(mockStatement.executeQuery(anyString())).thenReturn(mockResultSet)
+    when(mockResultSet.getMetaData).thenReturn(mockMetaData)
+
+
+    when(mockMetaData.getColumnCount).thenReturn(2)
+    when(mockResultSet.next).thenReturn(true, true, false)
+
+
+    val repo = new DataBaseRepoImpl{
+      override val connection: Connection = mockConnection
+    }
+
+    val result = repo.getAll
+
+    val actual = "The output file name is output.csv"
+
+    result shouldBe actual
+
+
+  }
 
 
 }

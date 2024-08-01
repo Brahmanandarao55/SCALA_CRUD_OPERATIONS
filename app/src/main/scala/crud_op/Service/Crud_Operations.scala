@@ -30,10 +30,9 @@ class Crud_Operations {
     logger.info(menuOptions)
     logger.info("Enter your choice:")
     try {
-      val input = StdIn.readLine().toInt
-//      val input = System.in.read().toString.trim // Read input from System.in, convert to String, and trim
-//      val intInput = input.toInt
-      input match {
+      val input = StdIn.readChar()
+      val x = input.toInt
+      x match {
         case 1 => logger.info(repo.createTable())
         case 2 =>
           logger.info("Insertion Begin")
