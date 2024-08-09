@@ -81,7 +81,9 @@ class DataBaseRepoImpl extends DataBaseRepo {
         statement.executeBatch()
       }
 
-      statement.executeBatch()
+      else{
+        statement.executeBatch()
+      }
       bufferedSource.close()
       connection.commit()
 
