@@ -9,28 +9,27 @@ import org.scalatest.{FlatSpec, Matchers}
 import org.scalatestplus.mockito.MockitoSugar
 import org.slf4j.Logger
 
-
 class Crud_Operations_UnitTest extends FlatSpec with MockitoSugar with Matchers {
 
-  val mockConfig: Config = mock[Config]
-  val mockConsoleUserInput: ConsoleUserInput = mock[ConsoleUserInput]
-  val mockLogger = mock[Logger]
-  val mockRepo = mock[DataBaseRepoImpl]
   it should "sdfsdf" in {
+    val mockConfig: Config = mock[Config]
+    val mockConsoleUserInput: ConsoleUserInput = mock[ConsoleUserInput]
+    val mockLogger = mock[Logger]
+    val mockRepo = mock[DataBaseRepoImpl]
 
-    when(mockConsoleUserInput.readLine("")).thenReturn("Nandha")
+    // Mocking the correct prompt used in the menu method
+    when(mockConsoleUserInput.readLine("Enter your choice:")).thenReturn("1")
+    when(mockRepo.createTable()).thenReturn("Table Created")
 
-    val x = new Crud_Operations{
+    val x = new Crud_Operations {
       override val repo = mockRepo
       override val userInput_Object: ConsoleUserInput = mockConsoleUserInput
+      override val logger: Logger = mockLogger
     }
 
-     x.menu()
-//    val actual = "Choose an operation:"
+    x.menu()
 
-    verify(mockLogger).info(anyString())
-//    verify(mockConsoleUserInput).readLine("")
-
-//    result shouldBe actual
+    verify(mockConsoleUserInput).readLine("Enter your choice:")
+    verify(mockRepo).createTable()
   }
 }
