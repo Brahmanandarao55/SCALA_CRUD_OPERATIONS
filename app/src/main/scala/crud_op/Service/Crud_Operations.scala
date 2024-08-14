@@ -28,7 +28,6 @@ class Crud_Operations {
     To Repeat Options Enter Value Greater Than 7
   """
     logger.info(menuOptions)
-//    logger.info("Enter your choice:")
     try {
       val input = userInput_Object.readLine("Enter your choice:").toInt
       input match {
@@ -38,7 +37,6 @@ class Crud_Operations {
           repo.insertData(filePath)
           logger.info("Insertion Ended")
         case 3 =>
-
           val id = userInput_Object.readLine("Enter ID:").toInt
           repo.getDataById(Some(id))
         case 4 =>
@@ -69,7 +67,7 @@ class Crud_Operations {
     }
     catch {
       case e: EOFException => logger.error(s"Connection Failed ${e.getMessage}")
-        "Choose an operation:"
+        "Enter Valid Input"
     }
   }
 
