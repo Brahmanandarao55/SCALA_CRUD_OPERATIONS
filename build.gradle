@@ -24,6 +24,10 @@ final wartRemoveJarPath=rootProject.buildscript.configurations.getByName("classp
 
 allprojects {
 
+    tasks.withType(JavaExec) {
+        jvmArgs = ['-Xmx1024m']
+    }
+
     repositories {
         mavenCentral()
     }
@@ -51,8 +55,9 @@ configure(subprojects){
         testImplementation 'io.cucumber:cucumber-junit:6.10.0'
 
     }
-
+//def testJvmArgs=['-Duser.timezone=UTC','-Dfile.encoding=UTF-8','-Xmx8g']
     test{
+//        jvmArgs=testJvmArgs
         reports.html.enabled false
         doFirst {
             def cp =classpath.getFiles().join(File.pathSeparator)

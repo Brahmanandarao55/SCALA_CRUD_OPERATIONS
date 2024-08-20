@@ -32,7 +32,7 @@ class GenerateRandomData_Unit_Test extends FlatSpec with Matchers with MockitoSu
 
   }
 
-  it should "If File path is Doesn't exists" in {
+  it should "If file path is doesn't exists" in {
     val mockFile = mock[File]
     val csvFilePath = " "
     val mockObject = mock[Crud_Operations]
