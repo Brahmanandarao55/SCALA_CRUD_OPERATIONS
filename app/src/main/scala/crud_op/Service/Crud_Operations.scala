@@ -5,7 +5,6 @@ import crud_op.Entity.Person
 import crud_op.Repository.DataBaseRepoImpl
 import org.slf4j.{Logger, LoggerFactory}
 
-import java.io.EOFException
 
 class Crud_Operations {
   val config: Config = ConfigFactory.load().getConfig("filepath")

@@ -13,7 +13,8 @@ import scala.util.Try
 class DataBaseRepoImpl extends DataBaseRepo {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass)
-  val connection: Connection = DatabaseConnection.getConnection
+  val databaseConnection  = new DatabaseConnection
+  val connection: Connection = databaseConnection.getConnection
 
   override def createTable(): String = {
 

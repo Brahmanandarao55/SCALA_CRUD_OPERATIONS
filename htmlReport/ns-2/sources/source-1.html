@@ -59,7 +59,7 @@ Current scope:     <a href="../../index.html">all classes</a>
     0%
   </span>
   <span class="absValue">
-    (0/12)
+    (0/13)
   </span>
 </td>
 <td class="coverageStat">
@@ -75,7 +75,7 @@ Current scope:     <a href="../../index.html">all classes</a>
     0%
   </span>
   <span class="absValue">
-    (0/112)
+    (0/113)
   </span>
 </td>
 </tr>
@@ -97,11 +97,13 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;import java.io.{File, FileWriter}
 &nbsp;import java.sql.{Connection, PreparedStatement, ResultSet, SQLException, Statement}
 &nbsp;import scala.io.Source
+&nbsp;import scala.util.Try
 &nbsp;
 <b class="nc">&nbsp;class DataBaseRepoImpl extends DataBaseRepo {</b>
 &nbsp;
 <b class="nc">&nbsp;  private val logger: Logger = LoggerFactory.getLogger(getClass)</b>
-<b class="nc">&nbsp;  val connection: Connection = DatabaseConnection.getConnection</b>
+<b class="nc">&nbsp;  val databaseConnection  = new DatabaseConnection</b>
+<b class="nc">&nbsp;  val connection: Connection = databaseConnection.getConnection</b>
 &nbsp;
 &nbsp;  override def createTable(): String = {
 &nbsp;
@@ -170,7 +172,9 @@ Current scope:     <a href="../../index.html">all classes</a>
 <b class="nc">&nbsp;        statement.executeBatch()</b>
 &nbsp;      }
 &nbsp;
-<b class="nc">&nbsp;      statement.executeBatch()</b>
+&nbsp;      else{
+<b class="nc">&nbsp;        statement.executeBatch()</b>
+&nbsp;      }
 <b class="nc">&nbsp;      bufferedSource.close()</b>
 <b class="nc">&nbsp;      connection.commit()</b>
 &nbsp;
@@ -373,7 +377,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2024-07-26 11:19</div>
+    <div style="float:right;">generated on 2024-08-21 12:14</div>
 </div>
 </body>
 </html>

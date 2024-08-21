@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
-  <title>Coverage Report > ConsoleUserInput</title>
+  <title>Coverage Report > UserInput</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -22,50 +22,14 @@ Current scope:     <a href="../../index.html">all classes</a>
     <a href="../index.html">crud_op.Service</a>
 </div>
 
-<h1>Coverage Summary for Class: ConsoleUserInput (crud_op.Service)</h1>
+<h1>Coverage Summary for Class: UserInput (crud_op.Service)</h1>
 
 <table class="coverageStats">
 <tr>
   <th class="name">Class</th>
-<th class="coverageStat 
-">
-  Class, %
-</th>
-<th class="coverageStat 
-">
-  Method, %
-</th>
-<th class="coverageStat 
-">
-  Line, %
-</th>
 </tr>
 <tr>
-  <td class="name">ConsoleUserInput</td>
-<td class="coverageStat">
-  <span class="percent">
-    0%
-  </span>
-  <span class="absValue">
-    (0/1)
-  </span>
-</td>
-<td class="coverageStat">
-  <span class="percent">
-    0%
-  </span>
-  <span class="absValue">
-    (0/2)
-  </span>
-</td>
-<td class="coverageStat">
-  <span class="percent">
-    0%
-  </span>
-  <span class="absValue">
-    (0/4)
-  </span>
-</td>
+  <td class="name">UserInput</td>
 </tr>
 
 </table>
@@ -76,17 +40,11 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <pre>
 <code class="sourceCode" id="sourceCode">&nbsp;package crud_op.Service
-&nbsp;import org.slf4j.LoggerFactory
 &nbsp;
-&nbsp;
-<b class="nc">&nbsp;class ConsoleUserInput extends UserInput {</b>
-&nbsp;
-&nbsp;  override def readLine(prompt: String): String = {
-<b class="nc">&nbsp;    val logger = LoggerFactory.getLogger(getClass)</b>
-<b class="nc">&nbsp;    logger.info(prompt)</b>
-<b class="nc">&nbsp;    scala.io.StdIn.readLine()</b>
-&nbsp;  }
+&nbsp;trait UserInput {
+&nbsp;  def readLine(prompt:String): String
 &nbsp;}
+&nbsp;
 </code>
 </pre>
 </div>

@@ -5,7 +5,7 @@ import com.typesafe.config.{Config, ConfigFactory}
 import java.sql.{Connection, DriverManager}
 
 
-object DatabaseConnection {
+class DatabaseConnection {
    val configurations: Config = ConfigFactory.load().getConfig("database")
    val url: String = configurations.getString("url")
    val host: String = configurations.getString("host")
